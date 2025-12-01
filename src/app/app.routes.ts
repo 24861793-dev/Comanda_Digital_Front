@@ -24,11 +24,12 @@ export const routes: Routes = [
   },
   
   // Rotas Flutuantes (Assíncronas)
-  { 
-    path: 'motoboy', 
-    loadComponent: () => import('./modulo-cozinha/painel/painel.component').then(m => m.PainelComponent), 
-    title: 'Motoboy | Rota' 
-  },
+	{ 
+		path: 'motoboy', 
+		loadComponent: () => import('./motoboy/motoboy.component').then(m => m.MotoboyComponent), 
+		title: 'Motoboy | Rota' 
+	},
+>>>>>>> 2f861db (Rascunho do motoboy, muitos bugs pendentes.)
 	{ 
 		path: 'cliente', 
 		// Rota do cliente: agora carrega o novo HomeComponent como tela inicial.

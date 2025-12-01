@@ -1,0 +1,97 @@
+:root{--bg:#f8fafc}
+.page-root{padding:12px;background:var(--bg);min-height:100vh}
+.section{margin-bottom:18px}
+.section h4{margin:8px 0 12px;font-size:1rem;color:#111}
+.empty{padding:12px;color:#666;background:#fff;border-radius:8px;box-shadow:0 1px 6px rgba(0,0,0,0.04)}
+
+@media(min-width:720px){
+	.page-root{max-width:720px;margin:0 auto}
+}
+
+/* Design-only styles for Motoboy screen (mobile-first) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
+:root{
+	--bg:#f6f7fb;
+	--card:#ffffff;
+	--muted:#6b7280;
+	--accent:#2563eb;
+	--accept:#10b981;
+	--radius:12px;
+}
+
+*{box-sizing:border-box;font-family:Inter, Roboto, system-ui, -apple-system, 'Segoe UI', sans-serif}
+body{background:var(--bg);margin:0}
+
+.mf-header{position:sticky;top:0;background:var(--card);border-bottom:1px solid #eef2f7;z-index:20}
+.mf-header-inner{padding:16px 14px}
+.greeting{font-size:1.05rem;color:#0f172a}
+.strong{font-weight:700}
+.company{font-size:.9rem;color:var(--muted);margin-top:4px}
+
+.mf-container{padding:16px;max-width:760px;margin:0 auto}
+.mf-section{margin-bottom:20px}
+.mf-title{font-size:1rem;margin:6px 0 12px;color:#0b1221;font-weight:700}
+
+.mf-card{background:var(--card);padding:14px;border-radius:var(--radius);box-shadow:0 6px 18px rgba(2,6,23,0.06);margin-bottom:12px}
+.mf-card-large{padding:18px}
+.card-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.order-id{font-weight:600;color:#0b1221}
+.order-label{font-weight:400;color:var(--muted);margin-left:6px;font-size:.92rem}
+.order-date{color:var(--muted);font-size:.9rem}
+.card-address{color:#1f2937;font-size:.95rem;margin-bottom:10px}
+.card-actions{display:flex;justify-content:flex-end}
+
+.btn{border:0;padding:8px 12px;border-radius:10px;font-weight:600;cursor:pointer;transition:all .18s ease}
+.btn:focus{outline:2px solid rgba(37,99,235,0.12)}
+.btn-primary{background:transparent;border:1px solid rgba(37,99,235,0.12);color:var(--accent)}
+.btn-primary:hover{background:rgba(211, 175, 77, 0.06)}
+.btn-accept{background:var(--accept);color:#fff}
+.btn-accept:hover{filter:brightness(.95)}
+
+.mf-empty{padding:12px;text-align:center;color:var(--muted);background:var(--card);border-radius:10px}
+
+.history-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
+.history-item{background:transparent;padding:10px;color:#111;border-radius:10px}
+.history-text{color:var(--muted);margin-left:8px}
+
+/* Responsive */
+@media(min-width:640px){
+	.mf-container{padding:20px}
+	.mf-card{display:block}
+}
+
+/* New styles for badges, pins, and exact layout */
+.mf-card{position:relative;padding-left:72px}
+.mf-card .card-body{display:block}
+.left-badge{position:absolute;left:12px;top:18px;width:48px;height:48px;border-radius:999px;background:#ff8a33;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;box-shadow:0 4px 10px rgba(0,0,0,0.08)}
+.left-badge.gray{background:#9aa6b2;color:#fff}
+.left-badge.small{width:40px;height:40px;top:12px;left:12px}
+.left-badge.orange{background:#ff7a00}
+
+/* lighter badge specifically for the "Em rota agora" card */
+.mf-card.em-rota .left-badge{ background:#ff9a4d }
+
+.card-body .order-label-top{font-weight:700;color:#0b1221}
+.card-body .order-date{color:var(--muted);font-size:.88rem}
+.meta{display:flex;gap:10px;align-items:flex-start;margin-bottom:10px}
+.meta .pin{width:20px;height:20px;display:flex;align-items:center;justify-content:center}
+.meta .pin.small{width:18px;height:18px}
+.meta .card-address{font-size:.92rem;color:#374151}
+
+.btn.full{width:100%;display:block}
+.btn-primary{background:#ff7a00;color:#fff;border-radius:10px}
+.btn-primary:hover{filter:brightness(.97)}
+.btn-accept{background:#ff7a00;color:#fff;border-radius:10px}
+
+.chev{opacity:.8}
+
+.history-item{display:flex;gap:12px;align-items:flex-start;background:#fff;padding:12px;border-radius:12px;box-shadow:0 4px 12px rgba(2,6,23,0.04);position:relative;padding-left:72px}
+.history-content{flex:1}
+.history-top{font-weight:700;color:#0b1221}
+.history-date{float:right;color:var(--muted);font-weight:600;margin-left:8px;font-size:.9rem}
+.history-sub{color:var(--muted);font-size:.9rem;margin-top:6px}
+
+.small{font-size:.86rem;color:var(--muted)}
+
+
