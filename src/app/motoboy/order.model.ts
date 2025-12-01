@@ -1,4 +1,4 @@
-export type OrderStatus = 'PENDING' | 'ON_THE_WAY' | 'DELIVERED';
+import { OrderStatus } from '../enums/order-status.enum';
 
 export interface OrderItem {
   name: string;

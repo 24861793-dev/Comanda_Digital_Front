@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import type { Order } from './order.model';
+import { OrderStatus } from '../enums/order-status.enum';
 
 @Component({
   selector: 'delivery-details',
@@ -30,8 +31,8 @@ import type { Order } from './order.model';
 
         <footer class="modal-actions" *ngIf="order as o">
           <button class="btn danger" (click)="cancel.emit(o)">Cancelar entrega</button>
-          <button *ngIf="o.status !== 'ON_THE_WAY'" class="btn primary" (click)="start.emit(o)">Iniciar entrega</button>
-          <button *ngIf="o.status === 'ON_THE_WAY'" class="btn success" (click)="finish.emit(o)">Finalizar entrega</button>
+          <button *ngIf="o.status !== OrderStatus.ON_THE_WAY" class="btn primary" (click)="start.emit(o)">Iniciar entrega</button>
+          <button *ngIf="o.status === OrderStatus.ON_THE_WAY" class="btn success" (click)="finish.emit(o)">Finalizar entrega</button>
         </footer>
       </section>
     </div>
@@ -56,4 +57,6 @@ export class DeliveryDetailsComponent {
   @Output() start = new EventEmitter<Order | undefined>();
   @Output() finish = new EventEmitter<Order | undefined>();
   @Output() cancel = new EventEmitter<Order | undefined>();
+  // expose enum to template for comparisons
+  OrderStatus = OrderStatus;
 }

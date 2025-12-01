@@ -15,7 +15,7 @@
     <div *ngFor="let item of itensCarrinho" class="cart-item">
 
       <a class="item-thumb" (click)="openDetail(item)">
-        <img *ngIf="item.image" [src]="item.image" [alt]="item.name" class="item-image" (error)="onImgError($event)">
+        <img *ngIf="item.image" [src]="item.image" [alt]="item.name" class="item-image">
         <div *ngIf="!item.image" class="item-placeholder">🍽️</div>
       </a>
 

@@ -47,7 +47,7 @@
 				<h3>Itens do pedido</h3>
 				<ul>
 						<li class="card" *ngFor="let it of itemsForView()">
-							<img class="item-image" *ngIf="(it.image || it.dishId) ; else placeholder" [src]="it.image || ('assets/img/pratos/' + it.dishId + '.png')" [alt]="it.name" (error)="onImgError($event)" />
+							<img class="item-image" *ngIf="(it.image || it.dishId) ; else placeholder" [src]="it.image || ('assets/img/pratos/' + it.dishId + '.png')" [alt]="it.name" />
 						    <ng-template #placeholder><div class="item-image ph"></div></ng-template>
 						<div class="item-body">
 							<div class="name">{{ it.name }}</div>

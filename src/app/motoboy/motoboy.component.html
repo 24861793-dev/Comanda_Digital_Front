@@ -1,108 +1,45 @@
-<!-- Static visual design only: Motoboy Screen -->
-<header class="mf-header">
-	<div class="mf-header-inner">
-		<div class="greeting">Olá, <span class="strong">Motoboy!</span></div>
-		<div class="company">Prato Feito Delivery</div>
-	</div>
-</header>
+<!-- Motoboy Screen dinamizado -->
+<motoboy-header></motoboy-header>
 
 <main class="mf-container" role="main">
 
-	<!-- Em rota agora -->
-	<section class="mf-section">
-		<h2 class="mf-title">Em rota agora</h2>
+  <!-- Em rota agora -->
+  <section class="mf-section">
+	<h2 class="mf-title">Em rota agora</h2>
 
-		<article class="mf-card mf-card-large em-rota" data-teste="em-rota">
-			<div class="left-badge">#46</div>
-			<div class="card-body">
-				<div class="card-row">
-					<div>
-						<div class="order-label-top">Pedido Nº 00146</div>
-						<div class="order-date">01 de dez.</div>
-					</div>
-					<div class="chev"> 
-						<!-- chevron -->
-						<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 6L15 12L9 18" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-					</div>
-				</div>
+	<div *ngIf="inRouteOrders.length === 0" class="mf-empty">Nenhum pedido em rota</div>
 
-				<div class="meta">
-					<div class="pin">
-						<!-- pin icon -->
-						<svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 11.5C13.3807 11.5 14.5 10.3807 14.5 9C14.5 7.61929 13.3807 6.5 12 6.5C10.6193 6.5 9.5 7.61929 9.5 9C9.5 10.3807 10.6193 11.5 12 11.5Z" stroke="#9CA3AF" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 9C19 14.25 12 21 12 21C12 21 5 14.25 5 9C5 6.23858 7.23858 4 10 4C11.0609 4 12.0783 4.37868 12.9 5.043" stroke="#9CA3AF" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-					</div>
-					<div class="card-address">Entregar em<br><strong>Av. Brasil, 456</strong><br><span class="small">Bairro Industrial</span></div>
-				</div>
+	<div *ngFor="let o of inRouteOrders">
+	  <delivery-card [order]="o" [mode]="'in-route'" (details)="viewDetails($event)"></delivery-card>
+	</div>
+  </section>
 
-				<div class="card-actions">
-					<button class="btn btn-primary full">Ver detalhes</button>
-				</div>
-			</div>
-		</article>
-	</section>
+  <!-- Pedidos disponíveis -->
+  <section class="mf-section">
+	<h2 class="mf-title">Pedidos disponíveis</h2>
 
-	<!-- Pedidos disponíveis -->
-	<section class="mf-section">
-		<h2 class="mf-title">Pedidos disponíveis</h2>
+	<div *ngIf="pedidosDisponiveis.length === 0" class="mf-empty">Sem pedidos disponíveis</div>
 
-		<!-- Test card (if none, replace with the empty state below) -->
-		<article class="mf-card available">
-			<div class="left-badge orange">#45</div>
-			<div class="card-body">
-				<div class="card-row">
-					<div>
-						<div class="order-label-top">Pedido Nº 00145</div>
-						<div class="order-date">01 de dez.</div>
-					</div>
-				</div>
+	<div *ngFor="let p of pedidosDisponiveis">
+	  <delivery-card [order]="p" [mode]="'available'" (accept)="acceptOrder($event)" (details)="viewDetails($event)"></delivery-card>
+	</div>
+  </section>
 
-				<div class="meta">
-					<div class="pin small">
-						<svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 11.5C13.3807 11.5 14.5 10.3807 14.5 9C14.5 7.61929 13.3807 6.5 12 6.5C10.6193 6.5 9.5 7.61929 9.5 9C9.5 10.3807 10.6193 11.5 12 11.5Z" stroke="#9CA3AF" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 9C19 14.25 12 21 12 21C12 21 5 14.25 5 9C5 6.23858 7.23858 4 10 4C11.0609 4 12.0783 4.37868 12.9 5.043" stroke="#9CA3AF" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-					</div>
-					<div class="card-address">Entregar em<br><strong>Rua das Flores, 123</strong><br><span class="small">Centro</span></div>
-				</div>
+  <!-- Entregas recentes -->
+  <section class="mf-section">
+	<h2 class="mf-title">Entregas recentes</h2>
+	<delivery-history-list [orders]="entregasRecentes"></delivery-history-list>
+  </section>
 
-				<div class="card-actions">
-					<button class="btn btn-accept full">Aceitar</button>
-				</div>
-			</div>
-		</article>
+  <!-- Modal de detalhes -->
+  <delivery-details *ngIf="selectedOrder" [order]="selectedOrder"
+	(close)="closeDetails()"
+	(start)="startDelivery($event)"
+	(finish)="finishDelivery($event)"
+	(cancel)="openCancel($event)">
+  </delivery-details>
 
-		<!-- Empty state example (comment out when a card is present) -->
-		<!-- <div class="mf-empty">Sem pedidos disponíveis</div> -->
-	</section>
-
-	<!-- Entregas recentes -->
-	<section class="mf-section">
-		<h2 class="mf-title">Entregas recentes</h2>
-
-		<ul class="history-list">
-			<li class="history-item">
-				<div class="left-badge gray small">#47</div>
-				<div class="history-content"> 
-					<div class="history-top">Pedido Nº 00147 <span class="history-date">01 de dez.</span></div>
-					<div class="history-sub">Entregar em<br><strong>Rua do Comércio, 789</strong><br><span class="small">Eldorado</span></div>
-				</div>
-			</li>
-
-			<li class="history-item">
-				<div class="left-badge gray small">#42</div>
-				<div class="history-content"> 
-					<div class="history-top">Pedido Nº 00142 <span class="history-date">01 de dez.</span></div>
-					<div class="history-sub">Entregar em<br><strong>Rua Palmeiras, 321</strong><br><span class="small">Centro</span></div>
-				</div>
-			</li>
-
-			<li class="history-item">
-				<div class="left-badge gray small">#40</div>
-				<div class="history-content"> 
-					<div class="history-top">Pedido Nº 00140 <span class="history-date">30 de nov.</span></div>
-					<div class="history-sub">Entregar em<br><strong>Rua Santos Dumont, 555</strong><br><span class="small">Industrial</span></div>
-				</div>
-			</li>
-		</ul>
-	</section>
+  <cancel-modal [visible]="showCancel" (confirm)="confirmCancel()" (close)="closeCancel()"></cancel-modal>
 
 </main>
 
