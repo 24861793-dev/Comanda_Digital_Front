@@ -15,6 +15,8 @@ export interface ClientDTO {
   };
   // número do endereço (addressNumber na entidade)
   addressNumber?: number | string;
+  // complemento do endereço (campo persistido no backend)
+  complement?: string;
   // Também mantemos campos auxiliares convenientes para o formulário
   endereco?: string; // string única mostrada no campo (logradouro, bairro, cidade - UF)
   numero?: string | number;

@@ -58,6 +58,13 @@ export class CarrinhoService {
       price: Number(normalized.price) || 0,
       quantity: Number(normalized.quantity) || 1
     };
+    // preserve any image/url fields from the original item if present
+    if (item) {
+      if (item.image) (toAdd as any).image = item.image;
+      if (item.UrlImage) (toAdd as any).UrlImage = item.UrlImage;
+      if (item.urlImage) (toAdd as any).urlImage = item.urlImage;
+      if (item.urlImagem) (toAdd as any).urlImagem = item.urlImagem;
+    }
     this.items.push(toAdd);
     this.itemAddedSubject.next({ ...toAdd });
     this.itemsChangedSubject.next(this.items.map(i => ({ ...i })));

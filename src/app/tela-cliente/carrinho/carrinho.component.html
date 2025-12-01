@@ -15,19 +15,19 @@
     <div *ngFor="let item of itensCarrinho" class="cart-item">
 
       <a class="item-thumb" (click)="openDetail(item)">
-        <img *ngIf="item.UrlImage || item.urlImagem" [src]="item.UrlImage || item.urlImagem" [alt]="item.nome" class="item-image">
-        <div *ngIf="!(item.UrlImage || item.urlImagem)" class="item-placeholder">🍽️</div>
+        <img *ngIf="item.image" [src]="item.image" [alt]="item.name" class="item-image" (error)="onImgError($event)">
+        <div *ngIf="!item.image" class="item-placeholder">🍽️</div>
       </a>
 
       <div class="item-details">
-        <a class="item-name" (click)="openDetail(item)">{{ item.nome }}</a>
-        <p class="item-description">{{ item.descricao }}</p>
+        <a class="item-name" (click)="openDetail(item)">{{ item.name }}</a>
+        <p class="item-description">{{ item.description }}</p>
       </div>
 
       <div class="item-controls">
         <div class="quantity-control">
           <!-- Mostrar lixeira circular quando qtd=1 -->
-          <button *ngIf="item.quantidade===1" class="circle-btn" (click)="removerItem(item)" aria-label="Remover item">
+          <button *ngIf="item.quantity===1" class="circle-btn" (click)="removerItem(item)" aria-label="Remover item">
             <!-- Trash SVG (circular outline + trash) -->
             <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden>
               <circle cx="12" cy="12" r="11" fill="#f2f3f2"></circle>
@@ -36,14 +36,14 @@
           </button>
 
           <!-- Mostrar botão de diminuir circular quando qtd>1 -->
-          <button *ngIf="item.quantidade>1" class="circle-btn" (click)="atualizarQuantidade(item, -1)" aria-label="Diminuir quantidade">
+          <button *ngIf="item.quantity>1" class="circle-btn" (click)="atualizarQuantidade(item, -1)" aria-label="Diminuir quantidade">
             <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden>
               <circle cx="12" cy="12" r="11" fill="#f2f3f2"></circle>
               <path d="M8 12h8" stroke="#6b6b6b" stroke-width="1.6" stroke-linecap="round"/>
             </svg>
           </button>
 
-          <span class="quantity-display">{{ item.quantidade }}</span>
+          <span class="quantity-display">{{ item.quantity }}</span>
 
           <!-- Botão de somar (círculo com +) -->
           <button class="circle-btn" (click)="atualizarQuantidade(item, 1)" aria-label="Aumentar quantidade">

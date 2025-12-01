@@ -94,12 +94,17 @@ export class CarrinhoComponent implements OnInit {
         name: it.name ?? it.nome ?? '',
         description: it.description ?? it.descricao ?? '',
         price: priceNum,
-        image: it.image || it.UrlImage || it.urlImage || it.urlImagem || '',
+        image: it.image || it.UrlImage || it.urlImage || it.urlImagem || (it.dishId ?? it.id ? `assets/img/pratos/${it.dishId ?? it.id}.png` : ''),
         quantity,
         subtotal: priceNum * quantity
       } as CarrinhoItem;
     });
     this.calcularTotais();
+  }
+
+  // Esconde imagem quebrada em vez de exibir ícone de erro
+  onImgError(event: any) {
+    try { event.target.style.display = 'none'; } catch(e) { /* noop */ }
   }
 
   private toNumberPrice(v: any): number {
@@ -184,6 +189,16 @@ export class CarrinhoComponent implements OnInit {
     const payload: any = {
       items: itemsPayload
     };
+    // Inclui frete/valores no payload para que o backend persista o total corretamente
+    const subtotal = this.valorTotal || itemsPayload.reduce((s:any, it:any) => s + (Number(it.price) || 0) * (Number(it.quantity) || 1), 0);
+    const delivery = Number(this.shipping || 0);
+    const fullTotal = Number(subtotal) + Number(delivery);
+    // Backend pode esperar diferentes nomes; adicionamos aliases comuns
+    payload.total = fullTotal;
+    payload.price = fullTotal;
+    payload.amount = fullTotal;
+    payload.deliveryFee = delivery;
+    payload.shipping = delivery;
     if (clientId) {
       // preserve stored id as-is (could be cpf string or numeric id)
       payload.client = { id: clientId };
@@ -311,7 +326,9 @@ export class CarrinhoComponent implements OnInit {
         this.carrinhoService.clear();
         this.syncFromService();
         // navega com o pedido finalizado recebido do backend
-        this.router.navigate(['/cliente/pedido/aprovado'], { state: { order: finalOrder } });
+        // Passa também o valor do frete no state para que a tela de confirmação
+        // e rastreio possam mostrar o total com frete mesmo que o backend não persista.
+        this.router.navigate(['/cliente/pedido/aprovado'], { state: { order: finalOrder, shipping: this.shipping } });
       },
       error: (e) => {
         console.error('Erro ao finalizar pedido:', e);

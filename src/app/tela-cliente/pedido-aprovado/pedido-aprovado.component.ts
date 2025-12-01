@@ -13,25 +13,20 @@ export class PedidoAprovadoComponent {
   order: any = null;
   displayAddressLabel: string = 'Casa';
   displayTotal: string = 'R$0,00';
+  private shippingFromState: number | null = null;
 
   constructor(private router: Router) {
     const nav = this.router.getCurrentNavigation();
-    this.order = nav && nav.extras && (nav.extras as any).state ? (nav.extras as any).state.order : null;
+    const navState = nav && nav.extras && (nav.extras as any).state ? (nav.extras as any).state : {};
+    this.order = navState.order || null;
+    this.shippingFromState = navState.shipping !== undefined && navState.shipping !== null ? Number(navState.shipping) : null;
     // Processa order recebido para extrair complemento e total formatado
     if (this.order) {
       try {
-        // Extrai cliente/address complement (vários aliases possíveis)
-        const client = (this.order as any).client || (this.order as any).clientDTO || null;
-        let saveAs = '';
-        if (client) {
-          saveAs = client.salvarComo || client.saveAs || client.alias || client.complement || client.complemento || '';
-        }
-        // Se não encontrou no client, tenta no address aninhado
-        if (!saveAs && this.order.address) {
-          const a = this.order.address;
-          saveAs = a.complement || a.alias || a.saveAs || a.salvarComo || '';
-        }
-        this.displayAddressLabel = saveAs && String(saveAs).trim().length > 0 ? String(saveAs) : 'Casa';
+        // Extrai o complemento salvo no cliente ou no address (campo `complement`)
+        const client = this.order?.client ?? this.order?.clientDTO ?? null;
+        const complemento = (client && (client as any).complement) ?? (this.order && (this.order as any).address && (this.order as any).address.complement) ?? '';
+        this.displayAddressLabel = String(complemento || '').trim().length > 0 ? String(complemento).trim() : 'Casa';
 
         // Extrai total: backend pode retornar 'total', 'price', 'amount' ou calcular via items
         const possibleTotals = [(this.order as any).total, (this.order as any).price, (this.order as any).amount, (this.order as any).valor];
@@ -52,6 +47,11 @@ export class PedidoAprovadoComponent {
           }
           totalNum = acc;
         }
+        // Se o backend não persistiu o frete, soma o shipping vindo no state (se existir)
+        const backendHasShipping = Boolean((this.order as any).deliveryFee ?? (this.order as any).shipping ?? (this.order as any).frete ?? (this.order as any).shippingValue ?? (this.order as any).taxaEntrega);
+        if (this.shippingFromState != null && !backendHasShipping) {
+          totalNum = (Number(totalNum) || 0) + Number(this.shippingFromState || 0);
+        }
         this.displayTotal = this.formatCurrency(totalNum || 0);
       } catch (e) {
         console.warn('Erro ao processar order em PedidoAprovado:', e);
@@ -60,7 +60,10 @@ export class PedidoAprovadoComponent {
   }
 
   rastrear() {
-    this.router.navigate(['/cliente/rastreio'], { state: { order: this.order } });
+    // Ao navegar para rastreio, passe também o valor do frete (se disponível no state atual)
+    const state: any = { order: this.order };
+    if (this.shippingFromState != null) state.shipping = this.shippingFromState;
+    this.router.navigate(['/cliente/rastreio'], { state });
   }
 
   fechar() {
