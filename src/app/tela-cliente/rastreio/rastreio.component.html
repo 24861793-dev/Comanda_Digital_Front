@@ -1,1 +1,52 @@
-<p>rastreio works!</p>
+<div class="r-container">
+	<header class="r-header">
+		<h1>Rastreio do pedido</h1>
+		<p class="sub">Acompanhe o andamento da sua entrega em tempo real</p>
+	</header>
+
+	<section class="r-status" *ngIf="rastreio; else loading">
+		<div class="top">
+			<div class="left">
+				<div class="progress-wrap">
+					<div class="progress-bar" [style.width.%]="(rastreio.status === 'PENDING' ? 10 : rastreio.status === 'PREPARING' ? 40 : rastreio.status === 'READY' ? 60 : rastreio.status === 'ON_THE_WAY' ? 85 : rastreio.status === 'DELIVERED' ? 100 : 0)"></div>
+				</div>
+				<div class="status-line">
+					<div class="status-dot active"></div>
+					<div class="status-text">{{rastreio.status}}</div>
+				</div>
+			</div>
+			<div class="right">
+				<div class="eta">ETA: <strong>{{rastreio.etaMinutes ?? '—'}} min</strong></div>
+				<div class="total">Total: <strong>{{rastreio.total | currency:'BRL':'symbol':'1.2-2'}}</strong></div>
+			</div>
+		</div>
+
+		<div class="meta">
+			<div><strong>Endereço</strong><div class="muted">{{rastreio.address}}</div></div>
+			<div class="actions">
+				<button class="btn" (click)="callRider()" [disabled]="!rastreio.riderPhone">Ligar para entregador</button>
+				<button class="btn primary" (click)="confirmDelivery()" *ngIf="rastreio.status==='DELIVERED'">Confirmar entrega</button>
+			</div>
+		</div>
+
+		<section class="items">
+			<h3>Itens do pedido</h3>
+			<ul>
+				<li *ngFor="let it of rastreio.items">
+					<span class="qty">{{it.qty}}×</span>
+					<span class="name">{{it.name}}</span>
+					<span class="price">{{it.price | currency:'BRL'}}</span>
+				</li>
+			</ul>
+		</section>
+
+		<footer class="r-footer">
+			<small class="muted">Última atualização: {{rastreio.updatedAt || '—'}}</small>
+		</footer>
+	</section>
+
+	<ng-template #loading>
+		<div class="loading">Carregando status do pedido…</div>
+	</ng-template>
+</div>
+

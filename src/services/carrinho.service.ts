@@ -1,102 +1,125 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
 
+export interface CartItem {
+  dishId: number | string;
+  id?: number | string;
+  name: string;
+  price: number;
+  quantity: number;
+  [key: string]: any;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class CarrinhoService {
-  private items: any[] = [];
-  private itemAddedSubject = new Subject<any>();
+  private items: CartItem[] = [];
+  private itemAddedSubject = new Subject<CartItem>();
   // Observable público para componentes escutarem quando um item for adicionado
   itemAdded$ = this.itemAddedSubject.asObservable();
-  private itemsChangedSubject = new Subject<any[]>();
+  private itemsChangedSubject = new Subject<CartItem[]>();
   itemsChanged$ = this.itemsChangedSubject.asObservable();
 
   constructor() { }
 
-  // Adiciona item ao carrinho (memória). Emite evento para feedback visual.
+  // Normaliza campos do item recebido para { dishId, name, price, quantity }
+  private normalize(item: any): CartItem {
+    const dishId = item.dishId ?? item.id ?? null;
+    const id = item.id ?? dishId;
+    const name = item.name ?? item.nome ?? item.title ?? '';
+    const priceRaw = item.price ?? item.preco ?? item.valor ?? 0;
+    const price = typeof priceRaw === 'number' ? priceRaw : parseFloat(String(priceRaw).toString().replace(/[^0-9,.-]/g, '').replace(',', '.')) || 0;
+    const quantity = Number(item.quantity ?? item.quantidade ?? 1) || 1;
+    return { dishId, id, name, price, quantity } as CartItem;
+  }
+
+  // Adiciona item ao carrinho (memória). Se já existir, incrementa quantity.
   adicionar(item: any) {
     if (!item) return;
-    // identifica o dishId preferencialmente, fallback para id
-    const incomingDishId = item.dishId ?? item.id ?? null;
-    const incomingQty = item.quantidade ?? item.quantity ?? 1;
+    const normalized = this.normalize(item);
+    if (normalized.dishId === null || normalized.dishId === undefined) {
+      // fallback: gera dishId temporário a partir do name
+      normalized.dishId = normalized.id ?? normalized.name;
+    }
 
-    if (incomingDishId !== null) {
-      // procura existente por dishId ou id
-      const found = this.items.find(i => String(i.dishId ?? i.id) === String(incomingDishId));
-      if (found) {
-        // aumenta quantidade existente (não cria duplicata)
-        found.quantidade = (found.quantidade ?? found.quantity ?? 0) + Number(incomingQty);
-        this.itemAddedSubject.next(found);
-        this.itemsChangedSubject.next(this.items);
-        return;
-      }
-      // não encontrou: cria novo item clonado para evitar referências externas
-      const toAdd = {
-        ...item,
-        dishId: incomingDishId,
-        id: item.id ?? incomingDishId,
-        quantidade: Number(incomingQty)
-      };
-      this.items.push(toAdd);
-      this.itemAddedSubject.next(toAdd);
-      this.itemsChangedSubject.next(this.items);
+    const found = this.items.find(i => String(i.dishId) === String(normalized.dishId));
+    if (found) {
+      found.quantity = Number(found.quantity || 0) + Number(normalized.quantity || 1);
+      this.itemAddedSubject.next({ ...found });
+      this.itemsChangedSubject.next(this.items.map(i => ({ ...i })));
       return;
     }
 
-    // fallback quando não há id/dishId: adiciona por referência (como antes)
-    const fallback = { ...item, quantidade: incomingQty };
-    this.items.push(fallback);
-    this.itemAddedSubject.next(fallback);
-    this.itemsChangedSubject.next(this.items);
+    const toAdd: CartItem = {
+      dishId: normalized.dishId,
+      id: normalized.id,
+      name: normalized.name,
+      price: Number(normalized.price) || 0,
+      quantity: Number(normalized.quantity) || 1
+    };
+    this.items.push(toAdd);
+    this.itemAddedSubject.next({ ...toAdd });
+    this.itemsChangedSubject.next(this.items.map(i => ({ ...i })));
   }
 
-  // Retorna itens do carrinho
-  listar() {
-    // retorna cópia superficial para evitar mutações acidentais de fora
+  // Retorna cópia dos itens do carrinho com a estrutura padronizada
+  listar(): CartItem[] {
     return this.items.map(i => ({ ...i }));
   }
 
-  // Remove um item (por identidade ou por id se disponível)
+  // Remove um item (por dishId ou id)
   remover(item: any) {
     if (!item) return;
     const targetDishId = item.dishId ?? item.id ?? null;
-    if (targetDishId !== null) {
-      this.items = this.items.filter(i => String(i.dishId ?? i.id) !== String(targetDishId));
-      this.itemsChangedSubject.next(this.items);
+    if (targetDishId !== null && targetDishId !== undefined) {
+      this.items = this.items.filter(i => String(i.dishId) !== String(targetDishId));
+      this.itemsChangedSubject.next(this.items.map(i => ({ ...i })));
       return;
     }
     // fallback por referência
-    const idx = this.items.indexOf(item);
+    const idx = this.items.indexOf(item as CartItem);
     if (idx >= 0) {
       this.items.splice(idx, 1);
-      this.itemsChangedSubject.next(this.items);
+      this.itemsChangedSubject.next(this.items.map(i => ({ ...i })));
     }
   }
 
   // Limpa o carrinho
   clear() {
     this.items = [];
-    this.itemsChangedSubject.next(this.items);
+    this.itemsChangedSubject.next([]);
   }
 
-  // Atualiza quantidade de um item (por id ou referência)
+  // Atualiza quantidade de um item (por dishId ou referência). Se quantidade <= 0 remove o item.
   atualizarQuantidade(item: any, quantidade: number) {
     if (!item) return;
     const targetDishId = item.dishId ?? item.id ?? null;
-    if (targetDishId !== null) {
-      const found = this.items.find(i => String(i.dishId ?? i.id) === String(targetDishId));
+    if (targetDishId !== null && targetDishId !== undefined) {
+      const found = this.items.find(i => String(i.dishId) === String(targetDishId));
       if (found) {
-        found.quantidade = Number(quantidade);
-        this.itemsChangedSubject.next(this.items);
+        const q = Number(quantidade || 0);
+        if (q <= 0) {
+          this.items = this.items.filter(i => String(i.dishId) !== String(targetDishId));
+          this.itemsChangedSubject.next(this.items.map(i => ({ ...i })));
+          return;
+        }
+        found.quantity = q;
+        this.itemsChangedSubject.next(this.items.map(i => ({ ...i })));
         return;
       }
     }
     // fallback por referência
-    const idx = this.items.indexOf(item);
+    const idx = this.items.indexOf(item as CartItem);
     if (idx >= 0) {
-      this.items[idx].quantidade = Number(quantidade);
-      this.itemsChangedSubject.next(this.items);
+      const q = Number(quantidade || 0);
+      if (q <= 0) {
+        this.items.splice(idx, 1);
+        this.itemsChangedSubject.next(this.items.map(i => ({ ...i })));
+        return;
+      }
+      this.items[idx].quantity = q;
+      this.itemsChangedSubject.next(this.items.map(i => ({ ...i })));
     }
   }
 }

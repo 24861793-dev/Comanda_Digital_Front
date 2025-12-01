@@ -9,13 +9,13 @@ import { forkJoin } from 'rxjs';
 
 // Estrutura simples do item do carrinho usada neste componente
 interface CarrinhoItem {
+  dishId?: number | string;
   id?: number | string;
-  nome: string;
-  descricao?: string;
-  preco: number | string;
-  UrlImage?: string;
-  urlImagem?: string;
-  quantidade: number;
+  name: string;
+  description?: string;
+  price: number;
+  image?: string;
+  quantity: number;
   subtotal?: number;
 }
 
@@ -86,16 +86,17 @@ export class CarrinhoComponent implements OnInit {
   private syncFromService() {
     const stored = this.carrinhoService.listar() || [];
     this.itensCarrinho = stored.map((it: any) => {
-      const precoNum = this.toNumberPrice(it.preco);
-      const quantidade = typeof it.quantidade === 'number' ? it.quantidade : (it.quantidade ? Number(it.quantidade) : 1);
+      const priceNum = this.toNumberPrice(it.price ?? it.preco);
+      const quantity = typeof it.quantity === 'number' ? it.quantity : (it.quantity ? Number(it.quantity) : 1);
       return {
+        dishId: it.dishId ?? it.id,
         id: it.id,
-        nome: it.nome || it.name || '',
-        descricao: it.descricao || it.description || '',
-        preco: precoNum,
-        UrlImage: it.UrlImage || it.urlImage || it.urlImagem || it.image || '',
-        quantidade,
-        subtotal: precoNum * quantidade
+        name: it.name ?? it.nome ?? '',
+        description: it.description ?? it.descricao ?? '',
+        price: priceNum,
+        image: it.image || it.UrlImage || it.urlImage || it.urlImagem || '',
+        quantity,
+        subtotal: priceNum * quantity
       } as CarrinhoItem;
     });
     this.calcularTotais();
@@ -114,27 +115,29 @@ export class CarrinhoComponent implements OnInit {
 
   calcularTotais(): void {
     this.valorTotal = this.itensCarrinho.reduce((acc, item) => {
-      item.subtotal = this.toNumberPrice(item.preco) * (item.quantidade || 0);
+      item.subtotal = this.toNumberPrice(item.price) * (item.quantity || 0);
       return acc + (item.subtotal || 0);
     }, 0);
     // cálculo finalizado (logs de depuração removidos em limpeza)
   }
-
   atualizarQuantidade(item: CarrinhoItem, delta: number): void {
-    if (delta < 0 && item.quantidade === 1) {
+    if (!item) return;
+    if (delta < 0 && item.quantity === 1) {
       // se for diminuir quando quantidade=1, remove
       this.removerItem(item);
       return;
     }
-    const nova = Math.max(0, (item.quantidade || 0) + delta);
+    const nova = Math.max(0, (item.quantity || 0) + delta);
     // atualizar no serviço e sincronizar
-    this.carrinhoService.atualizarQuantidade(item, nova);
+    // usamos dishId/id para identificar o item no serviço
+    const identifier = { dishId: item.dishId ?? item.id };
+    this.carrinhoService.atualizarQuantidade(identifier, nova);
     // sincroniza novamente para refletir mudança
     this.syncFromService();
   }
 
   removerItem(item: CarrinhoItem) {
-    this.carrinhoService.remover(item);
+    this.carrinhoService.remover({ dishId: item.dishId ?? item.id });
     this.syncFromService();
   }
 
@@ -172,9 +175,9 @@ export class CarrinhoComponent implements OnInit {
     const clientId = null;
     let storedClient: any = null;
     const itemsPayload = this.itensCarrinho.map(i => ({
-      quantity: Number(i.quantidade) || 1,
-      price: Number(typeof i.preco === 'number' ? i.preco : Number(i.preco)) || 0,
-      dishId: Number(i.id)
+      quantity: Number(i.quantity) || 1,
+      price: Number(typeof i.price === 'number' ? i.price : Number(i.price)) || 0,
+      dishId: Number(i.dishId ?? i.id)
     }));
 
     // Payload enxuto — remove 'moment' e 'status' para evitar incompatibilidades se o backend gerar automaticamente
@@ -263,7 +266,7 @@ export class CarrinhoComponent implements OnInit {
 
         // 2) Adiciona todos os itens via POST /orders/{orderId}/items
         const itemCalls = this.itensCarrinho.map(it => {
-          const body = { quantity: Number(it.quantidade) || 1, price: Number(it.preco) || 0, dishId: Number(it.id) };
+          const body = { quantity: Number(it.quantity) || 1, price: Number(it.price) || 0, dishId: Number(it.dishId ?? it.id) };
           return this.orderService.addItem(orderId, body);
         });
 

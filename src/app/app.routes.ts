@@ -29,7 +29,7 @@ export const routes: Routes = [
 		loadComponent: () => import('./motoboy/motoboy.component').then(m => m.MotoboyComponent), 
 		title: 'Motoboy | Rota' 
 	},
->>>>>>> 2f861db (Rascunho do motoboy, muitos bugs pendentes.)
+        
 	{ 
 		path: 'cliente', 
 		// Rota do cliente: agora carrega o novo HomeComponent como tela inicial.
@@ -65,6 +65,13 @@ export const routes: Routes = [
 		path: 'cliente/pedido/aprovado',
 		loadComponent: () => import('./tela-cliente/pedido-aprovado/pedido-aprovado.component').then(m => m.PedidoAprovadoComponent),
 		title: 'Pedido Aprovado'
+	},
+
+	// Rota: Rastreio de pedido (cliente)
+	{
+		path: 'cliente/rastreio',
+		loadComponent: () => import('./tela-cliente/rastreio/rastreio.component').then(m => m.RastreioComponent),
+		title: 'Rastreio do Pedido'
 	},
 
 	// Perfil do cliente (formulário)

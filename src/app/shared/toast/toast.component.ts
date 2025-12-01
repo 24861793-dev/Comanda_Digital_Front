@@ -17,7 +17,8 @@ export class ToastComponent implements OnDestroy {
 
   constructor(private carrinho: CarrinhoService) {
     this.sub = this.carrinho.itemAdded$.subscribe(item => {
-      this.show(`${item.nome || item.name || 'Item'} adicionado ao carrinho`);
+      this.show(`${item['nome'] || item['name'] || 'Item'} adicionado ao carrinho`);
+
     });
   }
 
